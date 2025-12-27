@@ -1,6 +1,6 @@
 services:
   nodecast-tv:
-    build: .
+    build: https://github.com/technomancer702/nodecast-tv.git#main
     container_name: nodecast-tv
     ports:
       - "3000:3000"

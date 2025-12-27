@@ -15,6 +15,15 @@ A modern, web-based IPTV player featuring Live TV, EPG, Movies (VOD), and Series
   - Playback preferences (volume memory, auto-play).
 - **🐳 Docker Ready**: Easy deployment containerization.
 
+## Screenshots
+
+<div align="center">
+  <img src="public/img/screenshots/screenshot-1.png" width="45%" alt="Screenshot 1" />
+  <img src="public/img/screenshots/screenshot-2.png" width="45%" alt="Screenshot 2" />
+  <img src="public/img/screenshots/screenshot-3.png" width="45%" alt="Screenshot 3" />
+  <img src="public/img/screenshots/screenshot-4.png" width="45%" alt="Screenshot 4" />
+</div>
+
 ## Getting Started
 
 ### Prerequisites
@@ -44,11 +53,28 @@ A modern, web-based IPTV player featuring Live TV, EPG, Movies (VOD), and Series
 
 ### Docker Deployment
 
-Build and run the container using Docker Compose:
+You can run NodeCast TV easily using Docker.
 
-```bash
-docker-compose up -d --build
-```
+1.  Create a `docker-compose.yml` file (or copy the one from this repo):
+
+    ```yaml
+    services:
+      nodecast-tv:
+        build: https://github.com/technomancer702/nodecast-tv.git#main
+        container_name: nodecast-tv
+        ports:
+          - "3000:3000"
+        volumes:
+          - ./data:/app/data
+        restart: unless-stopped
+        environment:
+          - NODE_ENV=production
+    ```
+
+2.  Run the container:
+    ```bash
+    docker-compose up -d
+    ```
 
 The application will be available at `http://localhost:3000`.
 
