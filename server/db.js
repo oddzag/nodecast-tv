@@ -239,30 +239,4 @@ const favorites = {
   }
 };
 
-
-// EPG cache operations (simple in-memory for now)
-const epgCache = {
-  cache: new Map(),
-
-  get(channelId) {
-    return this.cache.get(channelId);
-  },
-
-  set(sourceId, channelId, data) {
-    this.cache.set(channelId, { sourceId, data, updated_at: new Date() });
-  },
-
-  clear(sourceId = null) {
-    if (sourceId) {
-      for (const [key, value] of this.cache) {
-        if (value.sourceId === sourceId) {
-          this.cache.delete(key);
-        }
-      }
-    } else {
-      this.cache.clear();
-    }
-  }
-};
-
-module.exports = { sources, hiddenItems, favorites, epgCache };
+module.exports = { sources, hiddenItems, favorites };
