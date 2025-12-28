@@ -955,7 +955,7 @@ class ChannelList {
      * Get list of visible (non-hidden) channels in display order
      */
     getVisibleChannels() {
-        const showHidden = this.showHiddenCheckbox.checked;
+        const showHidden = this.showHiddenCheckbox?.checked ?? false;
         return this.channels.filter(ch => {
             if (showHidden) return true;
             const channelHidden = this.isHidden('channel', ch.sourceId, ch.id);
