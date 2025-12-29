@@ -9,6 +9,7 @@ class ChannelList {
         this.searchInput = document.getElementById('channel-search');
         this.sourceSelect = document.getElementById('source-select');
         this.showHiddenCheckbox = document.getElementById('show-hidden');
+        this.toggleGroupsBtn = document.getElementById('toggle-groups');
         this.contextMenu = document.getElementById('context-menu');
 
         this.channels = [];
@@ -70,6 +71,12 @@ class ChannelList {
         this.collapsedGroups.clear();
         this.saveCollapsedState();
         this.container.querySelectorAll('.group-header.collapsed').forEach(h => h.classList.remove('collapsed'));
+
+        // Update toggle button
+        if (this.toggleGroupsBtn) {
+            this.toggleGroupsBtn.innerHTML = Icons.collapseAll;
+            this.toggleGroupsBtn.title = 'Collapse All';
+        }
     }
 
     /**
@@ -82,6 +89,12 @@ class ChannelList {
             h.classList.add('collapsed');
         });
         this.saveCollapsedState();
+
+        // Update toggle button
+        if (this.toggleGroupsBtn) {
+            this.toggleGroupsBtn.innerHTML = Icons.expandAll;
+            this.toggleGroupsBtn.title = 'Expand All';
+        }
     }
 
     /**
