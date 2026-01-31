@@ -41,26 +41,105 @@ nodecast-tv is a modern, web-based IPTV player featuring Live TV, EPG, Movies (V
 
 - Node.js (v14 or higher)
 - npm
+- git
+- curl
+- nginx(optional, needed if connecting from domain)
+- ufw (optional, recommended if making public)
 
-### Installation
-
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/nodecast-tv.git
-    cd nodecast-tv
+### Install as system service
+1. Update your packages, install the (simple) pre-reqs and create the user to run the service
+    ```
+    apt update; apt upgrade -y; apt install curl git nginx ufw
+    useradd -r -s /bin/false nodecast
     ```
 
-2.  Install dependencies:
-    ```bash
+2. Create Nodecast's working directory, clone the repo and install it, then give ownership to the service user
+    ```
+    mkdir /opt/nodecast-tv
+    git clone https://github.com/technomancer702/nodecast-tv.git /opt/nodecast-tv
+    cd /opt/nodecast-tv
     npm install
+    chown -R nodecast:nodecast /opt/nodecast-tv
     ```
 
-3.  Start the development server:
-    ```bash
-    npm run dev
+3. Install `node` 
+    ```
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+    apt install nodejs
     ```
 
-4.  Open your browser at `http://localhost:3000`.
+4. Create the system service config
+    ```
+    nano /etc/systemd/system/nodecast.service
+    ```
+    ```
+    [Unit]
+    Description=Nodecast-tv
+    After=network.target
+    
+    [Service]
+    Type=simple
+    User=nodecast
+    WorkingDirectory=/opt/nodecast-tv
+    ExecStart=/usr/bin/node server/index.js
+    Restart=on-failure
+    
+    [Install]
+    WantedBy=multi-user.target
+    ```
+    
+    Now reload the daemon, enable the service and then start it
+    ```
+    systemctl daemon-reload
+    systemctl enable nodecast.service
+    systemctl start nodecast.service
+    ```
+
+    If you check the status, you should see the following:
+    ```
+    systemctl status nodecast.service
+    Jan 31 19:13:55 nodecast node[13240]: [Sync] Starting global sync...
+    Jan 31 19:13:55 nodecast node[13240]: [Sync] Global sync completed at 2026-01-31T19:13:55.064Z
+    Jan 31 19:13:55 nodecast node[13240]: [Sync] Starting server-side sync timer: every 24 hours
+    Jan 31 19:13:55 nodecast node[13240]: [Sync] Next scheduled sync at: 2/1/2026, 7:13:55 PM
+    Jan 31 19:13:55 nodecast node[13240]: [HwDetect] Probing hardware acceleration capabilities...
+    Jan 31 19:13:55 nodecast node[13240]: /bin/sh: 1: nvidia-smi: not found
+    Jan 31 19:13:55 nodecast node[13240]: [HwDetect] No NVIDIA GPU detected
+    Jan 31 19:13:55 nodecast node[13240]: [HwDetect] VAAPI not available
+    Jan 31 19:13:55 nodecast node[13240]: /bin/sh: 1: lspci: not found
+    Jan 31 19:13:55 nodecast node[13240]: [HwDetect] Recommended encoder: software
+    ```
+
+    Which means Nodecast-tv is up and running. If you go to http://localhost:3000 (or whatever the IP where it's running) you should see the setup form to create a new user. The rest is optional
+
+#### Access Nodecast-tv from a local domain
+
+1. Set up an `nginx` config to point your domain to port 3000 with a proxy pass. If you're planning on using Nodecast from a device other than the one it's being hosted on, change `proxy_pass` to the IP of the device hosting Nodecast.
+    ```
+    nano /etc/nginx/sites-available/nodecast-tv.local
+    ```
+    
+    ```
+    server {
+        listen 80;
+        server_name nodecast-tv.local;
+    
+        location / {
+            proxy_pass http://127.0.0.1:3000;
+        }
+    }
+    ```
+
+2. Enable the site:
+    ```
+    ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/nodecast-tv.local
+    nginx -t
+    systemctl restart nginx
+    ```
+
+    At this point you'll either need to set up a host override on your device or on your router/firewall. 
+    
+    If you're planning to expose the player to the web, I would recommend - **at the very least** - configuring SSL certificates and enabling UFW.
 
 ### Docker Deployment
 
@@ -89,7 +168,6 @@ You can run nodecast-tv easily using Docker.
     ```
 
 The application will be available at `http://localhost:3000`.
-
 
 ### Hardware Acceleration Setup
 
